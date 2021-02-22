@@ -166,9 +166,10 @@ public abstract class ReferenceConfigBase<T> extends AbstractReferenceConfig {
 
     public void setInterface(String interfaceName) {
         this.interfaceName = interfaceName;
-        if (StringUtils.isEmpty(id)) {
-            id = interfaceName;
-        }
+        // FIXME, add id strategy in ConfigManager
+//        if (StringUtils.isEmpty(id)) {
+//            id = interfaceName;
+//        }
     }
 
     public void setInterface(Class<?> interfaceClass) {
@@ -258,12 +259,14 @@ public abstract class ReferenceConfigBase<T> extends AbstractReferenceConfig {
 
     @Override
     protected void computeValidRegistryIds() {
-        super.computeValidRegistryIds();
-        if (StringUtils.isEmpty(getRegistryIds())) {
-            if (getConsumer() != null && StringUtils.isNotEmpty(getConsumer().getRegistryIds())) {
-                setRegistryIds(getConsumer().getRegistryIds());
+        if (consumer != null) {
+            if (notHasSelfRegistryProperty()) {
+                setRegistries(consumer.getRegistries());
+                setRegistryIds(consumer.getRegistryIds());
             }
         }
+
+        super.computeValidRegistryIds();
     }
 
     @Parameter(excluded = true)
