@@ -57,7 +57,6 @@ import static org.apache.dubbo.common.constants.RegistryConstants.ROUTERS_CATEGO
 
 /**
  * ZookeeperRegistry
- *
  */
 public class ZookeeperRegistry extends FailbackRegistry {
 
@@ -148,6 +147,7 @@ public class ZookeeperRegistry extends FailbackRegistry {
                 String root = toRootPath();
                 ConcurrentMap<NotifyListener, ChildListener> listeners = zkListeners.computeIfAbsent(url, k -> new ConcurrentHashMap<>());
                 ChildListener zkListener = listeners.computeIfAbsent(listener, k -> (parentPath, currentChilds) -> {
+                  // 不会立刻执行，触发变更的时候才调用
                     for (String child : currentChilds) {
                         child = URL.decode(child);
                         if (!anyServices.contains(child)) {
@@ -157,8 +157,10 @@ public class ZookeeperRegistry extends FailbackRegistry {
                         }
                     }
                 });
+                //创建一个持久的节点,如果存在则跳过
                 zkClient.create(root, false);
                 List<String> services = zkClient.addChildListener(root, zkListener);
+                //遍历节点订阅
                 if (CollectionUtils.isNotEmpty(services)) {
                     for (String service : services) {
                         service = URL.decode(service);
@@ -169,8 +171,10 @@ public class ZookeeperRegistry extends FailbackRegistry {
                 }
             } else {
                 List<URL> urls = new ArrayList<>();
+                //在url上获取category的值，如果是*则订阅providers、consumers、routers、configurators，否则仅订阅providers
                 for (String path : toCategoriesPath(url)) {
                     ConcurrentMap<NotifyListener, ChildListener> listeners = zkListeners.computeIfAbsent(url, k -> new ConcurrentHashMap<>());
+                    //ChildListener()
                     ChildListener zkListener = listeners.computeIfAbsent(listener, k -> (parentPath, currentChilds) -> ZookeeperRegistry.this.notify(url, k, toUrlsWithEmpty(url, parentPath, currentChilds)));
                     zkClient.create(path, false);
                     List<String> children = zkClient.addChildListener(path, zkListener);

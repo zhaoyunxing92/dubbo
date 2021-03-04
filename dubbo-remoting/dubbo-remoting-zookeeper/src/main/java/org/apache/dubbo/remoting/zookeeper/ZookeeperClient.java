@@ -23,6 +23,12 @@ import java.util.concurrent.Executor;
 
 public interface ZookeeperClient {
 
+    /**
+     * 创建zk路径
+     *
+     * @param path      路径
+     * @param ephemeral 是否持久
+     */
     void create(String path, boolean ephemeral);
 
     void delete(String path);
