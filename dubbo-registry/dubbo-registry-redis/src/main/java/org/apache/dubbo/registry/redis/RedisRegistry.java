@@ -74,6 +74,9 @@ import static org.apache.dubbo.registry.Constants.UNREGISTER;
 
 /**
  * RedisRegistry
+ * 在RedisRegistry构造方法中会启动一个expireExecutor定时调度线程池，不断调用deferExpired()方法去延续key
+ * 的超时时间。如果服务提供者服务宕机，没有续期，则key会因为超时而被Redis删除，服务
+ * 也就会被认定为下线
  */
 public class RedisRegistry extends FailbackRegistry {
 
