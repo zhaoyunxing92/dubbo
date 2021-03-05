@@ -1,6 +1,7 @@
 package org.apache.dubbo.demo.spi.dubbo;
 
-import org.apache.dubbo.common.extension.ExtensionLoader;
+
+import com.alibaba.dubbo.common.extension.ExtensionLoader;
 
 /**
  * @author zhaoyunxing
@@ -9,10 +10,11 @@ import org.apache.dubbo.common.extension.ExtensionLoader;
 public class Main {
 
     public static void main(String[] args) {
-
-        DubboPrintService dubboPrintService = ExtensionLoader.getExtensionLoader(DubboPrintService.class)
+        /*ExtensionFactory factory = new SpiExtensionFactory();
+        DubboPrintService printService = factory.getExtension(DubboPrintService.class, "printService");*/
+        DubboPrintService printService = ExtensionLoader.getExtensionLoader(DubboPrintService.class)
                 .getDefaultExtension();
 
-        dubboPrintService.printInfo();
+        printService.printInfo();
     }
 }

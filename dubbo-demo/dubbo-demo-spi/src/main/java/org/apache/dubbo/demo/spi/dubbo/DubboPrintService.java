@@ -1,6 +1,7 @@
 package org.apache.dubbo.demo.spi.dubbo;
 
-import org.apache.dubbo.common.extension.SPI;
+
+import com.alibaba.dubbo.common.extension.SPI;
 
 /**
  * @author zhaoyunxing

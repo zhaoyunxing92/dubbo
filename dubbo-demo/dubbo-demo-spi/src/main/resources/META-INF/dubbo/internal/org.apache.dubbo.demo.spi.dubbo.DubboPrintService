@@ -1,1 +1,1 @@
-printService=org.apache.dubbo.demo.spi.dubbo.PrintServiceImpl
+printService=org.apache.dubbo.demo.spi.dubbo.DubboPrintServiceImpl
