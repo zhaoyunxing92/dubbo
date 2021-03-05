@@ -123,7 +123,8 @@ public class ExtensionLoader<T> {
      * @since 2.7.7
      */
     private static LoadingStrategy[] loadLoadingStrategies() {
-        return stream(load(LoadingStrategy.class).spliterator(), false)
+        //使用java spi加载类ServiceLoader#load()，排序根据ServiceLoader#getPriority()排序
+        return stream(load(ServiceLoader.class).spliterator(), false)
                 .sorted()
                 .toArray(LoadingStrategy[]::new);
     }
@@ -149,6 +150,15 @@ public class ExtensionLoader<T> {
         return type.isAnnotationPresent(SPI.class);
     }
 
+    /**
+     * <ur>
+     *     <li>是否接口</li>
+     *     <li>是否包含@SPI注解</li>
+     * </ur>
+     *
+     * @param type 接口类
+     * @return 接口对应的实现
+     */
     @SuppressWarnings("unchecked")
     public static <T> ExtensionLoader<T> getExtensionLoader(Class<T> type) {
         if (type == null) {
@@ -773,6 +783,7 @@ public class ExtensionLoader<T> {
 
         Map<String, Class<?>> extensionClasses = new HashMap<>();
 
+        // 获取全部策略
         for (LoadingStrategy strategy : strategies) {
             loadDirectory(extensionClasses, strategy.directory(), type.getName(), strategy.preferExtensionClassLoader(), strategy.overridden(), strategy.excludedPackages());
             loadDirectory(extensionClasses, strategy.directory(), type.getName().replace("org.apache", "com.alibaba"), strategy.preferExtensionClassLoader(), strategy.overridden(), strategy.excludedPackages());
@@ -807,6 +818,15 @@ public class ExtensionLoader<T> {
         loadDirectory(extensionClasses, dir, type, false, false);
     }
 
+    /**
+     *
+     * @param extensionClasses HashMap类型的扩展类
+     * @param dir 目录
+     * @param type 类型
+     * @param extensionLoaderClassLoaderFirst 是否优先使用ExtensionLoader类加载
+     * @param overridden 是否覆盖
+     * @param excludedPackages 要排除的包
+     */
     private void loadDirectory(Map<String, Class<?>> extensionClasses, String dir, String type,
                                boolean extensionLoaderClassLoaderFirst, boolean overridden, String... excludedPackages) {
         String fileName = dir + type;
