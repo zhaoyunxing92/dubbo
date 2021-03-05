@@ -18,8 +18,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.dubbo</groupId>
+            <groupId>com.alibaba</groupId>
             <artifactId>dubbo-common</artifactId>
+            <version>2.6.7</version>
         </dependency>
     </dependencies>
 </project>
