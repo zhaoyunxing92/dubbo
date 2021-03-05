@@ -210,6 +210,7 @@ public class RedisRegistry extends FailbackRegistry {
     public void doRegister(URL url) {
         String key = toCategoryPath(url);
         String value = url.toFullString();
+        //过期时间
         String expire = String.valueOf(System.currentTimeMillis() + expirePeriod);
         try {
             redisClient.hset(key, value, expire);
