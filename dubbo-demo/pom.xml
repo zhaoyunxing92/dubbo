@@ -18,7 +18,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.alibaba</groupId>
-        <artifactId>dubbo-parent</artifactId>
+        <artifactId>dubbo-2.6.x</artifactId>
         <version>2.6.7-SNAPSHOT</version>
     </parent>
     <artifactId>dubbo-demo</artifactId>
