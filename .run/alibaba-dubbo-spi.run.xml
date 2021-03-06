@@ -1,0 +1,15 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="alibaba-dubbo-spi" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="org.apache.dubbo.demo.spi.dubbo.AlibabaDubbo" />
+    <module name="dubbo-demo-spi" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="org.apache.dubbo.demo.spi.dubbo.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
