@@ -1,0 +1,1 @@
+helloService=org.apache.dubbo.demo.spi.apache.HelloServiceImpl

@@ -110,9 +110,10 @@ public class ExtensionLoader<T> {
     private volatile Throwable createAdaptiveInstanceError;
 
     private Set<Class<?>> cachedWrapperClasses;
-
+    // 不赞同的类 loadClass异常后添加
     private Map<String, IllegalStateException> exceptions = new ConcurrentHashMap<>();
 
+    // 静态 通过java的spi加载LoadingStrategy的策略
     private static volatile LoadingStrategy[] strategies = loadLoadingStrategies();
 
     public static void setLoadingStrategies(LoadingStrategy... strategies) {
@@ -478,6 +479,11 @@ public class ExtensionLoader<T> {
         return c != null;
     }
 
+    /**
+     * 获取支持的扩展 org.apache.dubbo.common.extension.ExtensionFactory文件的类
+     *
+     * @return extensions key [spi]
+     */
     public Set<String> getSupportedExtensions() {
         Map<String, Class<?>> clazzes = getExtensionClasses();
         return Collections.unmodifiableSet(new TreeSet<>(clazzes.keySet()));
@@ -645,13 +651,15 @@ public class ExtensionLoader<T> {
             throw findException(name);
         }
         try {
+            // 获取类实例
             T instance = (T) EXTENSION_INSTANCES.get(clazz);
             if (instance == null) {
+                // 不存在调用clazz.newInstance()
                 EXTENSION_INSTANCES.putIfAbsent(clazz, clazz.newInstance());
                 instance = (T) EXTENSION_INSTANCES.get(clazz);
             }
+            //注入扩展
             injectExtension(instance);
-
 
             if (wrap) {
 
@@ -685,6 +693,12 @@ public class ExtensionLoader<T> {
         return getExtensionClasses().containsKey(name);
     }
 
+    /**
+     * 注入扩展
+     *
+     * @param instance clazz
+     * @return
+     */
     private T injectExtension(T instance) {
 
         if (objectFactory == null) {
@@ -693,6 +707,7 @@ public class ExtensionLoader<T> {
 
         try {
             for (Method method : instance.getClass().getMethods()) {
+                //跳过非sett方法
                 if (!isSetter(method)) {
                     continue;
                 }
@@ -708,6 +723,7 @@ public class ExtensionLoader<T> {
                 }
 
                 try {
+                    // 获取属性
                     String property = getSetterProperty(method);
                     Object object = objectFactory.getExtension(pt, property);
                     if (object != null) {
@@ -788,9 +804,11 @@ public class ExtensionLoader<T> {
 
         Map<String, Class<?>> extensionClasses = new HashMap<>();
 
-        // 获取全部策略
+        // 通过java spi获取全部策略然后获取ExtensionFactory子类
         for (LoadingStrategy strategy : strategies) {
+            // 加载apache dubbo的
             loadDirectory(extensionClasses, strategy.directory(), type.getName(), strategy.preferExtensionClassLoader(), strategy.overridden(), strategy.excludedPackages());
+            // 加载alibaba dubbo下的扩展
             loadDirectory(extensionClasses, strategy.directory(), type.getName().replace("org.apache", "com.alibaba"), strategy.preferExtensionClassLoader(), strategy.overridden(), strategy.excludedPackages());
         }
 
@@ -921,9 +939,12 @@ public class ExtensionLoader<T> {
 
     /**
      * eg: 文件内容是：spi=org.apache.dubbo.Spi 为例
-     * <p>
-     * 1. 检查类是否带有@Adaptive注解
-     * 2. 是否是一个包装类
+     *
+     * <ul>
+     *     <li>判断两个类是否接口跟实现关系type.isAssignableFrom(clazz)</li>
+     *     <li>检查类是否带有@Adaptive注解</li>
+     *     <li>是否是一个包装类</li>
+     * </ul>
      *
      * @param extensionClasses map
      * @param resourceURL      磁盘文件路径
@@ -934,6 +955,7 @@ public class ExtensionLoader<T> {
      */
     private void loadClass(Map<String, Class<?>> extensionClasses, java.net.URL resourceURL, Class<?> clazz, String name,
                            boolean overridden) throws NoSuchMethodException {
+        // 判断两个类是否接口跟实现关系
         if (!type.isAssignableFrom(clazz)) {
             throw new IllegalStateException("Error occurred when loading extension class (interface: " +
                     type + ", class line: " + clazz.getName() + "), class "
@@ -958,9 +980,10 @@ public class ExtensionLoader<T> {
 
             String[] names = NAME_SEPARATOR.split(name);
             if (ArrayUtils.isNotEmpty(names)) {
-                // 缓存@Activate注解的类
+                // 缓存@Activate注解的类 cachedActivates
                 cacheActivateClass(clazz, names[0]);
                 for (String n : names) {
+                    // cachedNames
                     cacheName(clazz, n);
                     saveInExtensionClass(extensionClasses, clazz, n, overridden);
                 }
@@ -1054,9 +1077,9 @@ public class ExtensionLoader<T> {
     /**
      * 1.先获取class上的@Extension注解的值
      * 2.如果没有值则根据类名计算一个
-     *
+     * <p>
      * eg: clazz=AdaptiveExtensionFactory type=ExtensionFactory
-     *     return= adaptive
+     * return= adaptive
      *
      * @param clazz 类
      * @return 类名称name
