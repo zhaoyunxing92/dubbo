@@ -98,10 +98,15 @@ public class ExtensionLoader<T> {
     private final Holder<Map<String, Class<?>>> cachedClasses = new Holder<>();
 
     private final Map<String, Object> cachedActivates = new ConcurrentHashMap<>();
+
     private final ConcurrentMap<String, Holder<Object>> cachedInstances = new ConcurrentHashMap<>();
+    // 缓存adaptive实例
     private final Holder<Object> cachedAdaptiveInstance = new Holder<>();
+    // 缓存adaptive的class
     private volatile Class<?> cachedAdaptiveClass = null;
+    // @SPI 的值
     private String cachedDefaultName;
+    // 创建adaptive 实例异常信息
     private volatile Throwable createAdaptiveInstanceError;
 
     private Set<Class<?>> cachedWrapperClasses;
@@ -117,14 +122,14 @@ public class ExtensionLoader<T> {
     }
 
     /**
+     * 使用java spi加载类ServiceLoader#load()，排序根据ServiceLoader#getPriority()排序
      * Load all {@link Prioritized prioritized} {@link LoadingStrategy Loading Strategies} via {@link ServiceLoader}
      *
      * @return non-null
      * @since 2.7.7
      */
     private static LoadingStrategy[] loadLoadingStrategies() {
-        //使用java spi加载类ServiceLoader#load()，排序根据ServiceLoader#getPriority()排序
-        return stream(load(ServiceLoader.class).spliterator(), false)
+        return stream(load(LoadingStrategy.class).spliterator(), false)
                 .sorted()
                 .toArray(LoadingStrategy[]::new);
     }
@@ -152,8 +157,8 @@ public class ExtensionLoader<T> {
 
     /**
      * <ur>
-     *     <li>是否接口</li>
-     *     <li>是否包含@SPI注解</li>
+     * <li>是否接口</li>
+     * <li>是否包含@SPI注解</li>
      * </ur>
      *
      * @param type 接口类
@@ -819,22 +824,26 @@ public class ExtensionLoader<T> {
     }
 
     /**
+     * 加载目录
      *
-     * @param extensionClasses HashMap类型的扩展类
-     * @param dir 目录
-     * @param type 类型
+     * @param extensionClasses                HashMap类型的扩展类
+     * @param dir                             目录
+     * @param type                            类型
      * @param extensionLoaderClassLoaderFirst 是否优先使用ExtensionLoader类加载
-     * @param overridden 是否覆盖
-     * @param excludedPackages 要排除的包
+     * @param overridden                      是否覆盖
+     * @param excludedPackages                要排除的包
      */
     private void loadDirectory(Map<String, Class<?>> extensionClasses, String dir, String type,
                                boolean extensionLoaderClassLoaderFirst, boolean overridden, String... excludedPackages) {
         String fileName = dir + type;
         try {
+            // 本地文件url
             Enumeration<java.net.URL> urls = null;
+            // 获取类加载器
             ClassLoader classLoader = findClassLoader();
 
             // try to load from ExtensionLoader's ClassLoader first
+            // 尝试先从ExtensionLoader的ClassLoader加载
             if (extensionLoaderClassLoaderFirst) {
                 ClassLoader extensionLoaderClassLoader = ExtensionLoader.class.getClassLoader();
                 if (ClassLoader.getSystemClassLoader() != extensionLoaderClassLoader) {
@@ -875,12 +884,14 @@ public class ExtensionLoader<T> {
                     line = line.trim();
                     if (line.length() > 0) {
                         try {
+                            // 对文件内容根据 = 进行分割
                             String name = null;
                             int i = line.indexOf('=');
                             if (i > 0) {
                                 name = line.substring(0, i).trim();
                                 line = line.substring(i + 1).trim();
                             }
+                            // className 存在且不再被排除的包里面（className.startsWith）
                             if (line.length() > 0 && !isExcluded(line, excludedPackages)) {
                                 loadClass(extensionClasses, resourceURL, Class.forName(line, true, classLoader), name, overridden);
                             }
@@ -908,6 +919,19 @@ public class ExtensionLoader<T> {
         return false;
     }
 
+    /**
+     * eg: 文件内容是：spi=org.apache.dubbo.Spi 为例
+     * <p>
+     * 1. 检查类是否带有@Adaptive注解
+     * 2. 是否是一个包装类
+     *
+     * @param extensionClasses map
+     * @param resourceURL      磁盘文件路径
+     * @param clazz            根据xxx=class 分割后的 Class.forName(class) org.apache.dubbo.Spi
+     * @param name             文件=前面的值    spi
+     * @param overridden       重复是否覆盖
+     * @throws NoSuchMethodException
+     */
     private void loadClass(Map<String, Class<?>> extensionClasses, java.net.URL resourceURL, Class<?> clazz, String name,
                            boolean overridden) throws NoSuchMethodException {
         if (!type.isAssignableFrom(clazz)) {
@@ -916,12 +940,16 @@ public class ExtensionLoader<T> {
                     + clazz.getName() + " is not subtype of interface.");
         }
         if (clazz.isAnnotationPresent(Adaptive.class)) {
+            //缓存以<code> Adaptive <code>注释的自适应类
             cacheAdaptiveClass(clazz, overridden);
         } else if (isWrapperClass(clazz)) {
+            // 直接调用type的构造方法,出现异常则返回false，否则返回true
             cacheWrapperClass(clazz);
         } else {
+            //执行类的无参构造方法
             clazz.getConstructor();
             if (StringUtils.isEmpty(name)) {
+                //获取@Extension 注解的值，如果没有则计算一个
                 name = findAnnotationName(clazz);
                 if (name.length() == 0) {
                     throw new IllegalStateException("No such extension name for the class " + clazz.getName() + " in the config " + resourceURL);
@@ -930,6 +958,7 @@ public class ExtensionLoader<T> {
 
             String[] names = NAME_SEPARATOR.split(name);
             if (ArrayUtils.isNotEmpty(names)) {
+                // 缓存@Activate注解的类
                 cacheActivateClass(clazz, names[0]);
                 for (String n : names) {
                     cacheName(clazz, n);
@@ -963,6 +992,7 @@ public class ExtensionLoader<T> {
     }
 
     /**
+     * 缓存用<code> Activate <code>注释的Activate类
      * cache Activate class which is annotated with <code>Activate</code>
      * <p>
      * for compatibility, also cache class with old alibaba Activate annotation
@@ -981,6 +1011,7 @@ public class ExtensionLoader<T> {
     }
 
     /**
+     * 缓存以<code> Adaptive <code>注释的自适应类
      * cache Adaptive class which is annotated with <code>Adaptive</code>
      */
     private void cacheAdaptiveClass(Class<?> clazz, boolean overridden) {
@@ -996,7 +1027,8 @@ public class ExtensionLoader<T> {
     /**
      * cache wrapper class
      * <p>
-     * like: ProtocolFilterWrapper, ProtocolListenerWrapper
+     * like: {@link org.apache.dubbo.rpc.protocol.ProtocolFilterWrapper},
+     * {@link org.apache.dubbo.rpc.protocol.ProtocolListenerWrapper}
      */
     private void cacheWrapperClass(Class<?> clazz) {
         if (cachedWrapperClasses == null) {
@@ -1019,6 +1051,16 @@ public class ExtensionLoader<T> {
         }
     }
 
+    /**
+     * 1.先获取class上的@Extension注解的值
+     * 2.如果没有值则根据类名计算一个
+     *
+     * eg: clazz=AdaptiveExtensionFactory type=ExtensionFactory
+     *     return= adaptive
+     *
+     * @param clazz 类
+     * @return 类名称name
+     */
     @SuppressWarnings("deprecation")
     private String findAnnotationName(Class<?> clazz) {
         org.apache.dubbo.common.Extension extension = clazz.getAnnotation(org.apache.dubbo.common.Extension.class);
@@ -1042,6 +1084,11 @@ public class ExtensionLoader<T> {
         }
     }
 
+    /**
+     * 获取 自适应扩展类
+     *
+     * @return
+     */
     private Class<?> getAdaptiveExtensionClass() {
         getExtensionClasses();
         if (cachedAdaptiveClass != null) {

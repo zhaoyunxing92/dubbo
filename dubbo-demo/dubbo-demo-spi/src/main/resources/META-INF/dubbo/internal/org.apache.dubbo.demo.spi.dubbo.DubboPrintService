@@ -1,1 +1,0 @@
-printService=org.apache.dubbo.demo.spi.dubbo.DubboPrintServiceImpl
