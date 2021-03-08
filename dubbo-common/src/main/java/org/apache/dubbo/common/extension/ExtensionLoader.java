@@ -265,6 +265,7 @@ public class ExtensionLoader<T> {
     }
 
     /**
+     * 获取自动激活的扩展类
      * Get activate extensions.
      *
      * @param url    url
@@ -429,6 +430,12 @@ public class ExtensionLoader<T> {
         return getExtension(name, true);
     }
 
+    /**
+     *
+     * @param name 扩展名称
+     * @param wrap 是否自动包装
+     * @return
+     */
     public T getExtension(String name, boolean wrap) {
         if (StringUtils.isEmpty(name)) {
             throw new IllegalArgumentException("Extension name == null");
@@ -592,6 +599,11 @@ public class ExtensionLoader<T> {
         }
     }
 
+    /**
+     * 获取自适应扩展类
+     *
+     * @return
+     */
     @SuppressWarnings("unchecked")
     public T getAdaptiveExtension() {
         Object instance = cachedAdaptiveInstance.get();

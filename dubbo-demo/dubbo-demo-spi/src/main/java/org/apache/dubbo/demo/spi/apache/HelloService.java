@@ -10,6 +10,6 @@ import org.apache.dubbo.common.extension.SPI;
 @SPI("helloService")
 public interface HelloService {
 
-    @Adaptive("abc")
+
     void echo(String abc);
 }
