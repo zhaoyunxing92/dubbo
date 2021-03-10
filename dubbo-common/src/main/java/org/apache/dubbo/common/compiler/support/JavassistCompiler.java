@@ -24,12 +24,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+<<<<<<< HEAD
  * (1) 初始化Javassist,设置默认参数，如设置当前的classpatho
  * (2) 通过正则匹配出所有import的包，并使用Javassist添加importo
  * (3) 通过正则匹配出所有extends的包，创建Class对象，并使用Javassist添加extendso
  * (4) 通过正则匹配出所有implements包，并使用Javassist添加implementso
  * (5) 通过正则匹配出类里面所有内容，即得到｛｝中的内容，再通过正则匹配出所有方法,并使用Javassist添加类方法。
  * (6) 生成Class对象。
+=======
+>>>>>>> 7f46405b32519bacc79d11d227a3894f9a439dde
  * JavassistCompiler. (SPI, Singleton, ThreadSafe)
  */
 public class JavassistCompiler extends AbstractCompiler {

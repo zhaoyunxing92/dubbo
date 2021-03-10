@@ -35,8 +35,11 @@ public class AdaptiveExtensionFactory implements ExtensionFactory {
     public AdaptiveExtensionFactory() {
         ExtensionLoader<ExtensionFactory> loader = ExtensionLoader.getExtensionLoader(ExtensionFactory.class);
         List<ExtensionFactory> list = new ArrayList<ExtensionFactory>();
+<<<<<<< HEAD
         // 调用SpringExtensionFactory和SpiExtensionFactory
         // keys=[spi,spring]
+=======
+>>>>>>> 7f46405b32519bacc79d11d227a3894f9a439dde
         for (String name : loader.getSupportedExtensions()) {
             list.add(loader.getExtension(name));
         }

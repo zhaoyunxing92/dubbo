@@ -28,11 +28,14 @@ public class AdaptiveCompiler implements Compiler {
 
     private static volatile String DEFAULT_COMPILER;
 
+<<<<<<< HEAD
     /**
      * 方法会在 ApplicationConfig 中被调用，也就是 Dubbo在启动时，会解析配置中的<dubbo:application compiler="jdk" />标签，获取设置的值
      *
      * @param compiler 编译器名字
      */
+=======
+>>>>>>> 7f46405b32519bacc79d11d227a3894f9a439dde
     public static void setDefaultCompiler(String compiler) {
         DEFAULT_COMPILER = compiler;
     }
