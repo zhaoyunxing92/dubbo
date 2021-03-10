@@ -47,10 +47,7 @@ public class ServiceRepository extends LifecycleAdapter implements FrameworkExt 
     private ConcurrentMap<String, ProviderModel> providers = new ConcurrentHashMap<>();
 
     // useful to find a provider model quickly with serviceInterfaceName:version
-<<<<<<< HEAD
     //使用serviceInterfaceName:version快速查找提供者模型很有用
-=======
->>>>>>> 7f46405b32519bacc79d11d227a3894f9a439dde
     private ConcurrentMap<String, ProviderModel> providersWithoutGroup = new ConcurrentHashMap<>();
 
     public ServiceRepository() {

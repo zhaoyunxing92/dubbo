@@ -433,15 +433,12 @@ public class ExtensionLoader<T> {
         return getExtension(name, true);
     }
 
-<<<<<<< HEAD
     /**
      *
      * @param name 扩展名称
      * @param wrap 是否自动包装
      * @return
      */
-=======
->>>>>>> 7f46405b32519bacc79d11d227a3894f9a439dde
     public T getExtension(String name, boolean wrap) {
         if (StringUtils.isEmpty(name)) {
             throw new IllegalArgumentException("Extension name == null");
@@ -605,14 +602,11 @@ public class ExtensionLoader<T> {
         }
     }
 
-<<<<<<< HEAD
     /**
      * 获取自适应扩展类
      *
      * @return
      */
-=======
->>>>>>> 7f46405b32519bacc79d11d227a3894f9a439dde
     @SuppressWarnings("unchecked")
     public T getAdaptiveExtension() {
         Object instance = cachedAdaptiveInstance.get();

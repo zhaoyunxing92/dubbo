@@ -311,10 +311,7 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
         ServiceRepository repository = ApplicationModel.getServiceRepository();
         ServiceDescriptor serviceDescriptor = repository.registerService(getInterfaceClass());
         repository.registerProvider(
-<<<<<<< HEAD
                 //interfaceName, group, version
-=======
->>>>>>> 7f46405b32519bacc79d11d227a3894f9a439dde
                 getUniqueServiceName(),
                 ref,
                 serviceDescriptor,
@@ -455,10 +452,7 @@ public class ServiceConfig<T> extends ServiceConfigBase<T> {
         URL url = new URL(name, host, port, getContextPath(protocolConfig).map(p -> p + "/" + path).orElse(path), map);
 
         // You can customize Configurator to append extra parameters
-<<<<<<< HEAD
         // 扩展字段
-=======
->>>>>>> 7f46405b32519bacc79d11d227a3894f9a439dde
         if (ExtensionLoader.getExtensionLoader(ConfiguratorFactory.class)
                 .hasExtension(url.getProtocol())) {
             url = ExtensionLoader.getExtensionLoader(ConfiguratorFactory.class)
