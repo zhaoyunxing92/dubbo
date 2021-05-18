@@ -84,6 +84,7 @@ public class DubboBeanDefinitionParser implements BeanDefinitionParser {
         beanDefinition.setLazyInit(false);
         String id = resolveAttribute(element, "id", parserContext);
         if (StringUtils.isEmpty(id) && required) {
+            // 使用标签name或interface作为bean名称
             String generatedBeanName = resolveAttribute(element, "name", parserContext);
             if (StringUtils.isEmpty(generatedBeanName)) {
                 if (ProtocolConfig.class.equals(beanClass)) {
@@ -145,6 +146,7 @@ public class DubboBeanDefinitionParser implements BeanDefinitionParser {
                 String property = StringUtils.camelToSplitName(beanProperty, "-");
                 props.add(property);
                 // check the setter/getter whether match
+                // 检查get、set方法是否匹配
                 Method getter = null;
                 try {
                     getter = beanClass.getMethod("get" + name.substring(3), new Class<?>[0]);
