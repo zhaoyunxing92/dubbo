@@ -19,6 +19,4 @@ public class ApachePrintServiceImpl implements ApachePrintService {
     public void printInfo() {
         System.out.println("hello apache dubbo spi");
     }
-
-
 }
